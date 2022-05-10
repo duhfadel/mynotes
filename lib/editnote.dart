@@ -57,11 +57,10 @@ class _EditNotePageState extends State<EditNotePage> {
             ),
             ElevatedButton(
               onPressed: () {
-                Note note = Note(
-                    title: titleController.text,
-                    description: descriptionController.text);
+                widget.note.title = titleController.text;
+                widget.note.description = descriptionController.text;
                 //Use <Nota>
-                Navigator.of(context).pop<Note>(note);
+                Navigator.of(context).pop<Note>(widget.note);
               },
               child: const Text('Save'),
             ),

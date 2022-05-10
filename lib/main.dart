@@ -56,15 +56,17 @@ class _HomeState extends State<Home> {
                   child: CircularProgressIndicator(),
                 );
               default:
+                List _notes = snapshot.data!.docs.map((e) {
+                  return Note.fromSnapshot(e)..id = e.id;
+                }).toList();
                 return ListView.builder(
-                    itemCount: snapshot.data!.docs.length,
+                    itemCount: _notes.length,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text(snapshot.data!.docs[index].id),
-                        subtitle: Text(
-                            (snapshot.data!.docs[index].data() as Map)['text']),
+                        title: Text(_notes[index].title),
+                        subtitle: Text(_notes[index].description),
                         onTap: () {
-                          _navegatorEditNote(context, notesList[index]);
+                          _navegatorEditNote(context, _notes[index]);
                         },
                       );
                     });
@@ -80,11 +82,16 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> _navegatorEditNote(BuildContext context, Note note) async {
-    Note note2 = await Navigator.of(context).push(
+    Note? note2 = await Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => EditNotePage(note: note)));
-    setState(() {
-      note = note2;
-    });
+    if (note2 == null) {
+      return;
+    }
+
+    // setState(() {
+    //   note = note2;
+    // });
+    updateBank(note);
   }
 
   Future<void> _navegatorNewNote(BuildContext context) async {
@@ -134,9 +141,18 @@ class _HomeState extends State<Home> {
     if (note != null) {
       FirebaseFirestore.instance
           .collection('Notes')
-          .doc(note.title)
-          .set({'text': note.description});
+          .doc(note.id)
+          .set(note.toJson());
     }
+  }
+}
+
+updateBank(Note? note) {
+  if (note != null) {
+    FirebaseFirestore.instance
+        .collection('Notes')
+        .doc(note.id)
+        .set(note.toJson());
   }
 }
 
